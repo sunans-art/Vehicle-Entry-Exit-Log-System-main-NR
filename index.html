@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+      content="width=device-width, initial-scale=1.0,
+               maximum-scale=1.0, user-scalable=no">
+  <title>Vehicle Entry Exit Log System</title>
+  <link href="https://fonts.googleapis.com/css2?family=K2D:wght@300;400;500;600;700&display=swap" rel="stylesheet"> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body ontouchstart="">
+<div class="app-container">
+<!-- ===================== Header ===================== -->
+<div class="header p-4">
+  <div style="
+      display:flex;
+      flex-direction:row !important;
+      align-items:left;
+      justify-content:left;
+      gap:30px;
+    ">
+      <!-- โลโก้ด้านซ้าย -->
+      <img src="logo-crc.png" 
+           alt="Company Logo" 
+           style="height:48px; width:auto;">
+
+      <!-- กล่องข้อความด้านขวา -->
+      <div style="display:flex; flex-direction:column;">
+          <h3 id="app-title" style="margin:0; font-size:20px; font-weight:600;">
+              ระบบบันทึกเข้า-ออกรถ
+          </h3>
+          <p id="company-name" style="margin:0; font-size:14px; opacity:0.9;">
+              พร้อมใช้งานเพื่อความปลอดภัย(สำนักงานใหญ่)
+          </p>
+      </div>
+
+  </div>
+</div>
+
+<!-- ===================== Home Screen ===================== -->
+<div id="home-screen" class="screen active">
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="scan-hero">
+      <h2 style="font-size:22px; font-weight:700;">
+        สรุปผลการตรวจสอบ
+      </h2>
+
+      <p style="color:#64748b; margin:0 0 10px;">
+        ตรวจสอบสภาพรถก่อนใช้งานเพื่อความปลอดภัย
+      </p>
+
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <div class="summary-title">วันนี้</div>
+        <div class="summary-value" id="sum-today">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">สัปดาห์นี้</div>
+        <div class="summary-value" id="sum-week">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">เดือนนี้</div>
+        <div class="summary-value" id="sum-month">0</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">ทั้งหมด</div>
+        <div class="summary-value" id="sum-total">0</div>
+      </div>
+
+    </div>
+
+    <div class="summary-card clickable" id="card-pass">
+      <div class="summary-title">รถผ่าน</div>
+      <div class="summary-value" id="sum-pass">0</div>
+      <div class="summary-detail">คลิกเพื่อดูรายละเอียด</div>
+    </div>
+    <br>
+    <div class="summary-card clickable" id="card-fail">
+      <div class="summary-title">ต้องซ่อม</div>
+      <div class="summary-value" id="sum-fail">0</div>
+      <div class="summary-detail">คลิกเพื่อดูรายละเอียด</div>
+    </div>
+
+    <div class="card" style="color: #000; margin-top:16px;">
+      <h3 class="section-title">สรุปผลการตรวจรถ</h3>
+      <canvas id="passFailChart" height="100"></canvas>
+    </div>
+
+    <div class="card" style="color: #000; margin-top:16px;">
+      <h3 class="section-title">สาเหตุรถที่ต้องซ่อม</h3>
+      <canvas id="reasonChart" height="100"></canvas>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ===================== Detail Screen ===================== -->
+    <div id="detail-screen" class="screen">
+      <div class="content">
+        <div class="card">
+
+          <div class="card-header">
+            <h3 class="card-title" id="detail-equipment-id">-</h3>
+            <span class="badge badge-good" id="detail-status">-</span>
+          </div>
+
+          <div style="text-align:center;margin:24px 0;">
+            <div id="ext-image-box"
+                style="width:80px;height:80px;margin:0 auto;background:#f3f3f3;border-radius:16px;display:flex;align-items:center;justify-content:center;">
+                <img id="detail-image"
+                    src=""
+                    style="width:100%;height:100%;object-fit:contain;border-radius:16px;display:none;">
+            </div>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-row">
+              <span class="info-label">Location</span>
+              <span class="info-value" id="detail-location">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ประเภทรถ</span>
+              <span class="info-value" id="detail-type">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ขนาดถัง</span>
+              <span class="info-value" id="detail-size">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">ตรวจครั้งล่าสุด</span>
+              <span class="info-value" id="detail-last-inspection">-</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">คุณสมบัติ</span>
+              <span class="info-value" id="detail-expiry">-</span>
+            </div>
+          </div>
+
+        </div>
+
+        <button id="start-inspection-btn" class="btn btn-primary">เริ่มการตรวจสอบ</button>
+        <button id="back-to-home-btn" class="btn btn-secondary">กลับหน้าแรก</button>
+      </div>
+    </div>
+
+<!-- ===================== Inspection Screen ===================== -->
+<div id="inspection-screen" class="screen">
+  <div class="content">
+
+    <h2 style="color:#000000; margin:0 0 8px;font-size:20px;font-weight:700;">
+      แบบฟอร์มตรวจเช็ครถก่อนใช้งาน
+    </h2>
+    <p style="color:#64748b;margin:0 0 24px;font-size:14px;">
+      รายการตรวจสอบความพร้อมของรถ
+    </p>
+
+    <!-- 1. รหัสพนักงาน -->
+    <div class="form-group">
+      <label class="form-label">รหัสพนักงาน</label>
+      <input type="text" class="form-input" id="emp-id" placeholder="กรอกรหัสพนักงาน">
+    </div>
+
+    <!-- 2. ชื่อพนักงานขับรถ -->
+    <div class="form-group">
+      <label class="form-label">ชื่อ–สกุล พนักงานขับรถ</label>
+      <input type="text" class="form-input" id="driver-name" placeholder="ชื่อ-สกุล">
+    </div>
+
+    <!-- 3. เบอร์รถ -->
+    <div class="form-group">
+      <label class="form-label">เบอร์รถ</label>
+      <input type="text" class="form-input" id="car-number" placeholder="เช่น ทะเบียน / รหัสรถ">
+    </div>
+
+    <!-- 3.1 ประเภทรถ (auto-fill) -->
+    <div class="form-group">
+      <label class="form-label">ประเภทรถ</label>
+      <input type="text" class="form-input" id="car-type"
+             placeholder="— เลือกอัตโนมัติเมื่อระบุเบอร์รถ —"
+             readonly style="background:#f1f5f9; color:#64748b; cursor:not-allowed;">
+    </div>
+
+    <!-- 4. ชื่อ AD -->
+    <div class="form-group">
+      <label class="form-label">ชื่อ–สกุล AD (แอ็ดรถ)</label>
+      <input type="text" class="form-input" id="ad-name" placeholder="ชื่อ-สกุล AD">
+    </div>
+
+    <!-- ======================
+         5. รายการตรวจเช็ครถ
+    ======================= -->
+    <h3 class="section-title" style="color:#000000;">รายการตรวจเช็ครถ</h3>
+
+    <!-- 5.1 น้ำมันเครื่อง -->
+    <div class="checklist-item">
+      <div class="checklist-question">น้ำมันเครื่อง</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="engine-oil" data-value="normal">ปกติ</button>
+        <button class="toggle-btn" data-question="engine-oil" data-value="refill">ต้องเติม</button>
+        <button class="toggle-btn" data-question="engine-oil" data-value="change">ต้องเปลี่ยน</button>
+      </div>
+    </div>
+
+    <!-- 5.2 น้ำหล่อเย็น -->
+    <div class="checklist-item">
+      <div class="checklist-question">น้ำหล่อเย็น</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="coolant" data-value="normal">ปกติ</button>
+        <button class="toggle-btn" data-question="coolant" data-value="refill">ต้องเติม</button>
+        <button class="toggle-btn" data-question="coolant" data-value="change">ต้องเปลี่ยน</button>
+      </div>
+    </div>
+
+    <!-- 5.3 สภาพยาง -->
+    <div class="checklist-item">
+      <div class="checklist-question">สภาพยาง</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="tire" data-value="normal">ปกติ</button>
+        <button class="toggle-btn" data-question="tire" data-value="refill">ต้องเติมลม</button>
+        <button class="toggle-btn" data-question="tire" data-value="change">ต้องเปลี่ยน</button>
+      </div>
+    </div>
+
+    <!-- 5.4 ไฟแสงสว่าง -->
+    <div class="checklist-item">
+      <div class="checklist-question">ไฟแสงสว่าง</div>
+      <div class="toggle-group">
+        <button class="toggle-btn" data-question="light" data-value="normal">ปกติ</button>
+        <button class="toggle-btn" data-question="light" data-value="repair">ต้องซ่อม</button>
+        <button class="toggle-btn" data-question="light" data-value="change">ต้องเปลี่ยน</button>
+      </div>
+    </div>
+
+    <!-- 6. กิโลเริ่มงาน -->
+    <div class="form-group">
+      <label class="form-label">กิโลเริ่มงาน (ออก)</label>
+      <input type="text" class="form-input" id="km-start" placeholder="เลขไมล์ตอนออก">
+    </div>
+    <!-- 6.0 แนบรูปภาพ เลขไมล์ออก -->
+    <div class="form-group">
+      <label class="form-label">แนบรูปภาพ (เลขไมล์ออก)</label>
+
+      <div class="file-upload">
+        <input
+          type="file"
+          id="img-start"
+          accept="image/*"
+          multiple
+          hidden
+        >
+
+        <button type="button"
+                class="file-btn"
+                onclick="document.getElementById('img-start').click()">
+          <i class="fa-solid fa-camera"></i>
+          เลือกรูปภาพ
+        </button>
+
+        <div class="file-info" id="info-start">
+          ยังไม่ได้เลือกรูป
+        </div>
+      </div>
+
+      <small class="file-hint">
+        รองรับหลายรูป (เลขไมล์ตอนออก)
+      </small>
+    </div>
+
+    <!-- 7. กิโลจบงาน -->
+    <div class="form-group">
+      <label class="form-label">กิโลจบงาน (เข้า)</label>
+      <input type="text" class="form-input" id="km-end" placeholder="เลขไมล์ตอนเข้า">
+    </div>
+     <!-- 7.0 แนบรูปภาพ เลขไมล์เข้า -->
+    <div class="form-group">
+      <label class="form-label">แนบรูปภาพ (เลขไมล์เข้า)</label>
+
+      <div class="file-upload">
+        <input
+          type="file"
+          id="img-end"
+          accept="image/*"
+          multiple
+          hidden
+        >
+
+        <button type="button"
+                class="file-btn"
+                onclick="document.getElementById('img-end').click()">
+          <i class="fa-solid fa-camera"></i>
+          เลือกรูปภาพ
+        </button>
+
+        <div class="file-info" id="info-end">
+          ยังไม่ได้เลือกรูป
+        </div>
+      </div>
+
+      <small class="file-hint">
+        รองรับหลายรูป (เลขไมล์ตอนเข้า)
+      </small>
+    </div>
+
+
+    <!-- 8. สถานที่ส่งสินค้า -->
+    <div class="form-group">
+      <label class="form-label">สถานที่ส่งสินค้า</label>
+      <input type="text" class="form-input" id="destination" placeholder="ระบุสถานที่">
+    </div>
+
+<!-- 9.3 แนบรูปภาพ ความเสียหาย -->
+<div class="form-group">
+  <label class="form-label">แนบรูปภาพ (สภาพรถผิดปกติ)</label>
+
+  <div class="file-upload">
+    <input
+      type="file"
+      id="img-pic"
+      accept="image/*"
+      multiple
+      hidden
+    >
+
+    <button type="button"
+            class="file-btn"
+            onclick="document.getElementById('img-pic').click()">
+      <i class="fa-solid fa-camera"></i>
+      เลือกรูปภาพ
+    </button>
+
+    <div class="file-info" id="info-pic">
+      ยังไม่ได้เลือกรูป
+    </div>
+  </div>
+
+  <small class="file-hint">
+    รองรับหลายรูป (ความเสียหาย)
+  </small>
+</div>
+
+    <div class="job-mode">
+      <button type="button"
+              class="mode-btn active"
+              data-mode="open">
+        🚚 ออกงาน
+      </button>
+
+      <button type="button"
+              class="mode-btn"
+              data-mode="close">
+        🏁 ปิดงาน
+      </button>
+    </div>
+
+    <!-- บันทึก -->
+    <button id="submit-inspection-btn" class="btn btn-success" disabled>
+      บันทึกผลการตรวจเช็ครถ
+    </button>
+
+    <button id="cancel-inspection-btn" class="btn btn-secondary">
+      ยกเลิก
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ===================== Result Screen ===================== -->
+    <div id="result-screen" class="screen">
+      <div class="content">
+
+        <div style="padding:40px 20px;">
+          <div class="result-icon result-pass" id="result-icon">✓</div>
+          <h2 class="result-title" id="result-title" style="color: #000;">บันทึกผลสำเร็จ</h2>
+          <p class="result-subtitle" id="result-subtitle">รถผ่านการตรวจสอบความปลอดภัย</p>
+
+          <div class="card">
+            <div class="info-grid">
+              <div class="info-row">
+                <span class="info-label">หมายเลยรถ</span>
+                <span class="info-value" id="result-equipment-id">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">ผู้ตรวจสอบ</span>
+                <span class="info-value" id="result-inspector">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">วันและเวลา</span>
+                <span class="info-value" id="result-timestamp">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">ผลการตรวจสอบ</span>
+                <span class="info-value" id="result-status">-</span>
+              </div>
+            </div>
+          </div>
+
+          <button id="new-inspection-btn" class="btn btn-primary" style="margin-top:24px; text-align: center;" >ดำเนินการต่อ</button>
+          <button id="view-history-btn" class="btn btn-secondary">ดูประวัติ</button>
+        </div>
+
+      </div>
+    </div>
+
+<!-- ===================== History Screen ===================== -->
+    <div id="history-screen" class="screen">
+      <div class="content">
+        <h2 style="color: #000; margin:0 0 20px;font-size:20px;font-weight:700;">ประวัติการตรวจสอบ</h2>
+        
+        <div class="search-bar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            id="history-search"
+            placeholder="ค้นหาเลขรถ หรือชื่อพนักงานขับรถ"
+          />
+        </div>
+
+        <div class="filter-bar">
+          <button class="filter-btn active" data-reason="all">
+            <i class="fa-solid fa-list"></i>
+            ทั้งหมด
+          </button>
+          <button class="filter-btn" data-reason="engine">
+            <i class="fa-solid fa-gear"></i>
+            เครื่อง
+          </button>
+          <button class="filter-btn" data-reason="coolant">
+            <i class="fa-solid fa-droplet"></i>
+            น้ำ
+          </button>
+          <button class="filter-btn" data-reason="tire">
+            <i class="fa-solid fa-circle-dot"></i>
+            ยาง
+          </button>
+          <button class="filter-btn" data-reason="light">
+            <i class="fa-solid fa-lightbulb"></i>
+            ไฟ
+          </button>
+        </div>
+
+        <div id="history-list"></div>
+
+        <div id="history-empty" class="loading" style="display:none;">
+          <p>ยังไม่มีประวัติการตรวจสอบ</p>
+        </div>
+      </div>
+    </div>
+
+<!-- ===================== Scan Screen ===================== -->
+<div id="scan-screen" class="screen">
+  <div class="content">
+    <h2 style="margin-bottom:16px;">สแกนคิวอาร์โค้ด</h2>
+
+    <video id="qr-video"
+           style="width:100%;border-radius:12px;background:#000;">
+    </video>
+
+    <p id="scan-status"
+       style="text-align:center;margin-top:12px;color:#64748b;">
+       กรุณานำกล้องไปยังคิวอาร์โค้ด...
+    </p>
+
+    <button id="stop-scan-btn" class="btn btn-secondary" onclick="stopQRScan(); navigateToScreen('home')"
+            style="margin-top:16px;">ยกเลิก</button>
+
+  </div>
+</div>
+
+<!-- ===================== Bottom Navigation ===================== -->
+<div class="bottom-nav">
+    <button class="nav-item active" data-screen="home">
+        <i class="fa-solid fa-house"></i>
+        <div>หน้าแรก</div>
+    </button>
+
+    <button class="nav-item" data-screen="all-ext">
+        <i class="fa-solid fa-car-rear"></i>
+        <div>รถ</div>
+    </button>
+
+    <button class="nav-item" data-screen="scan">
+        <i class="fa-solid fa-qrcode"></i>
+        <div>สแกน</div>
+    </button>
+
+    <button class="nav-item" data-screen="history">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <div>ประวัติ</div>
+    </button>
+
+    <button class="nav-item" data-screen="profile">
+        <i class="fa-solid fa-user"></i>
+        <div>โปรไฟล์</div>
+    </button>
+</div>
+
+<!-- ===================== Profile Screen ===================== -->
+<div id="profile-screen" class="screen">
+  <div class="content">
+
+    <div style="text-align:center; margin:10px 0 20px;">
+      <div style="
+          width:90px;
+          height:90px;
+          margin:0 auto 12px;
+          border-radius:50%;
+          background:linear-gradient(135deg,#339dda,#00a2ff);
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 4px 15px rgba(0,0,0,0.2);
+      ">
+        <i class="fa-solid fa-user" style="font-size:42px;color:white;"></i>
+      </div>
+
+      <h2 style="color: #000;margin:0;font-size:22px;font-weight:700;">โปรไฟล์ผู้ใช้งาน</h2>
+      <p style="margin:4px 0 0;color:#64748b;">ข้อมูลทั่วไปของระบบ</p>
+    </div>
+
+    <!-- Profile Card -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="info-grid">
+
+        <div class="info-row">
+          <span class="info-label">ชื่อผู้ใช้งาน</span>
+          <span class="info-value" id="profile-username">Guest User</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">สิทธิ์ผู้ใช้</span>
+          <span class="info-value">ทั่วไป</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">เวอร์ชันระบบ</span>
+          <span class="info-value">v1.0</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">วันที่ใช้งาน</span>
+          <span class="info-value" id="profile-date">
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Developer Card -->
+    <div class="card" style="border-left:5px solid #00a2ff; padding:20px;">
+
+      <!-- Developer Header -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <i class="fa-solid fa-code" 
+          style="font-size:18px; color:#00a2ff;"></i>
+        <h3 style="margin:0; font-size:18px; font-weight:600; color:rgb(0, 0, 0);">
+          System Developer
+        </h3>
+      </div>
+
+      <div class="info-grid" style="margin-bottom:18px;">
+        <div class="info-row">
+          <span class="info-label">ชื่อ</span>
+          <span class="info-value">Khem Jira</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">ตำแหน่ง</span>
+          <span class="info-value">Planning and Data Analysis</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">planning@crcsteel.co.th</span>
+        </div>
+      </div>
+
+      <!-- Manager Header -->
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <i class="fa-solid fa-user-shield" 
+          style="font-size:18px; color:#00a2ff;"></i>
+        <h3 style="margin:0; font-size:18px; font-weight:600; color:rgb(0, 0, 0);">
+          Information Security Administrator
+        </h3>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">ชื่อ</span>
+          <span class="info-value">Safety Sunaree</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">ตำแหน่ง</span>
+          <span class="info-value">Professional Safety Officer</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">sunaree21122534@gmail.com</span>
+        </div>
+      </div>
+
+    </div>
+
+
+    <button class="btn btn-secondary" onclick="navigateToScreen('home')" 
+      style="margin-top:24px;">
+      กลับหน้าแรก
+    </button>
+
+  </div>
+</div>
+
+
+<!-- ===================== All Extinguishers Screen ===================== -->
+<div id="all-ext-screen" class="screen">
+  <div class="content">
+    <h2 style="color:#000000; margin:0 0 20px;font-size:20px;font-weight:700;">
+      รายการรถทั้งหมด
+    </h2>
+
+    <div id="ext-list"></div>
+
+    <div id="ext-empty" class="loading" style="display:none;">
+      <p>ไม่พบข้อมูลรถ</p>
+    </div>
+  </div>
+</div>
+
+
+</div>
+<!-- ==================== GLOBAL LOADING OVERLAY ==================== -->
+<div id="loading-overlay">
+  <div class="loading-box">
+    <div class="loader"></div>
+    <div id="loading-text">กำลังโหลดข้อมูล...</div>
+  </div>
+</div>
+
+<div id="result-modal" class="modal-overlay">
+  <div class="modal-box" id="result-content"></div>
+</div>
+
+<script src="app.js?v=3"></script>
+
+</body>
+
+</html>
